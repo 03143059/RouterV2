@@ -5,12 +5,12 @@ new FormModel {
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
 			name: "this"
-			"visible": true
 			"title": "Proyecto 2 CC8 - Ruteador de Paquetes"
 			"defaultCloseOperation": 3
 			"$sizePolicy": 1
-			"$locationPolicy": 1
+			"$locationPolicy": 2
 			"minimumSize": new java.awt.Dimension( 640, 480 )
+			"locationByPlatform": true
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
 				"rows": 2
 				"columns": 1
@@ -45,6 +45,10 @@ new FormModel {
 						} )
 						add( new FormComponent( "javax.swing.JPopupMenu$Separator" ) {
 							name: "separator1"
+						} )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem6"
+							"action": new FormReference( "actionSettings" )
 						} )
 						add( new FormComponent( "javax.swing.JMenuItem" ) {
 							name: "menuItem3"
@@ -162,7 +166,7 @@ new FormModel {
 					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
 						"gridy": 1
 					} )
-					add( new FormComponent( "javax.swing.JFormattedTextField" ) {
+					add( new FormComponent( "javax.swing.JTextField" ) {
 						name: "txtTarget"
 						"font": new java.awt.Font( "Tahoma", 0, 14 )
 						"focusAccelerator": 'D'
@@ -426,6 +430,19 @@ new FormModel {
 			}
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 335, 475 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionSettings"
+			"$action.Name": "Preferencias"
+			"$action.ShortDescription": "Abrir ventana de preferencias"
+			"$action.LongDescription": "Abrir ventana de preferencias"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/settings.png" )
+			"$action.ActionCommandKey": "Settings"
+			auxiliary() {
+				"JavaCodeGenerator.className": "Settings"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 529 )
 		} )
 	}
 }

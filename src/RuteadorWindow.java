@@ -38,6 +38,7 @@ public class RuteadorWindow extends JFrame  {
     StopRouter actionStopRouter;
     StopForwarder actionStopForwarder;
     ScheduledThreadPoolExecutor exec;
+    public static DialogSettings dlgSettings = new DialogSettings();
 
     public void log(final String txt) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -83,15 +84,15 @@ public class RuteadorWindow extends JFrame  {
         initComponents();
 
         routeTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
-        MaskFormatter mf1 = null;
-        try {
-            mf1 = new MaskFormatter("###.###.###.###");
-        } catch (ParseException e) {
-
-        }
-        mf1.setPlaceholderCharacter('_');
-
-        mf1.install(txtTarget);
+//        MaskFormatter mf1 = null;
+//        try {
+//            mf1 = new MaskFormatter("###.###.###.###");
+//        } catch (ParseException e) {
+//
+//        }
+//        mf1.setPlaceholderCharacter('_');
+//
+//        mf1.install(txtTarget);
 
         setSize(new Dimension(800, 600));
 
@@ -107,6 +108,7 @@ public class RuteadorWindow extends JFrame  {
         abrirLog();
 
         this.actionRouteTable.actionPerformed(null);
+        setVisible(true);
     }
 
     private void initComponents() {
@@ -118,6 +120,7 @@ public class RuteadorWindow extends JFrame  {
         menu2 = new JMenu();
         menuItem4 = new JMenuItem();
         menuItem5 = new JMenuItem();
+        menuItem6 = new JMenuItem();
         menuItem3 = new JMenuItem();
         menu3 = new JMenu();
         menuItem2 = new JMenuItem();
@@ -135,7 +138,7 @@ public class RuteadorWindow extends JFrame  {
         label3 = new JLabel();
         lblSource = new JLabel();
         label4 = new JLabel();
-        txtTarget = new JFormattedTextField();
+        txtTarget = new JTextField();
         label5 = new JLabel();
         scrollPane1 = new JScrollPane();
         txtMsg = new JTextArea();
@@ -161,12 +164,13 @@ public class RuteadorWindow extends JFrame  {
         actionStartRouter = new StartRouter();
         actionSendMessage = new SendMessage();
         actionStartForwarder = new StartForwarder();
+        actionSettings = new Settings();
 
         //======== this ========
-        setVisible(true);
         setTitle("Proyecto 2 CC8 - Ruteador de Paquetes");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(640, 480));
+        setLocationByPlatform(true);
         Container contentPane = getContentPane();
         contentPane.setLayout(new BorderLayout());
 
@@ -205,6 +209,10 @@ public class RuteadorWindow extends JFrame  {
                     menuItem5.setAction(actionStartForwarder);
                     menu2.add(menuItem5);
                     menu2.addSeparator();
+
+                    //---- menuItem6 ----
+                    menuItem6.setAction(actionSettings);
+                    menu2.add(menuItem6);
 
                     //---- menuItem3 ----
                     menuItem3.setAction(actionRouteTable);
@@ -481,7 +489,6 @@ public class RuteadorWindow extends JFrame  {
         }
         contentPane.add(panelMain, BorderLayout.CENTER);
         setSize(770, 415);
-        setLocationRelativeTo(null);
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
 
         actionStopRouter = new StopRouter();
@@ -496,6 +503,7 @@ public class RuteadorWindow extends JFrame  {
     private JMenu menu2;
     private JMenuItem menuItem4;
     private JMenuItem menuItem5;
+    private JMenuItem menuItem6;
     private JMenuItem menuItem3;
     private JMenu menu3;
     private JMenuItem menuItem2;
@@ -513,7 +521,7 @@ public class RuteadorWindow extends JFrame  {
     private JLabel label3;
     private JLabel lblSource;
     private JLabel label4;
-    private JFormattedTextField txtTarget;
+    private JTextField txtTarget;
     private JLabel label5;
     private JScrollPane scrollPane1;
     private JTextArea txtMsg;
@@ -539,6 +547,7 @@ public class RuteadorWindow extends JFrame  {
     private StartRouter actionStartRouter;
     private SendMessage actionSendMessage;
     private StartForwarder actionStartForwarder;
+    private Settings actionSettings;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     private class Salir extends AbstractAction {
@@ -695,13 +704,17 @@ public class RuteadorWindow extends JFrame  {
             // JFormDesigner - End of action initialization  //GEN-END:initComponents
         }
 
-        Pattern pat = Pattern.compile("\\d{1,4}\\.\\d{1,4}\\.\\d{1,4}\\.\\d{1,4}");
+       // Pattern pat = Pattern.compile("\\d{1,4}\\.\\d{1,4}\\.\\d{1,4}\\.\\d{1,4}");
         public void actionPerformed(ActionEvent e) {
             String target = txtTarget.getText();
-            target.replaceAll("_", "");
-            Matcher matcher = pat.matcher(target);
-            if (!matcher.matches()) {
-                JOptionPane.showMessageDialog(null, "La direccion IP es invalida!");
+           // target.replaceAll("_", "");
+         //   Matcher matcher = pat.matcher(target);
+//            if (!matcher.matches()) {
+//                JOptionPane.showMessageDialog(null, "La direccion IP es invalida!");
+//                return;
+//            }
+            if (!RoutingService.dv.containsKey(target)) {
+                JOptionPane.showMessageDialog(null, "La ruta destino es invalida!");
                 return;
             }
             if (ForwardingService.SendMessage(new ForwarderMessage(
@@ -805,6 +818,22 @@ public class RuteadorWindow extends JFrame  {
             ForwardingService.stop();
             button8.setAction(actionStartForwarder);
             menuItem5.setAction(actionStartForwarder);
+        }
+    }
+
+    private class Settings extends AbstractAction {
+        private Settings() {
+            // JFormDesigner - Action initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+            putValue(NAME, "Preferencias");
+            putValue(SHORT_DESCRIPTION, "Abrir ventana de preferencias");
+            putValue(LONG_DESCRIPTION, "Abrir ventana de preferencias");
+            putValue(SMALL_ICON, new ImageIcon(getClass().getResource("/images/settings.png")));
+            putValue(ACTION_COMMAND_KEY, "Settings");
+            // JFormDesigner - End of action initialization  //GEN-END:initComponents
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            dlgSettings.setVisible(true);
         }
     }
 }

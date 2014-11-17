@@ -11,4 +11,9 @@ public class ForwarderMessage {
         this.to = to;
         this.text = text;
     }
+
+    @Override
+    public String toString() {
+        return "From:" + from + "\nTo:" + to + "\nMsg:"+text+"\n";
+     }
 }

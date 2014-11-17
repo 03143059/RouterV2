@@ -13,8 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BroadcastingService implements Runnable {
-    private Neighbor to;    // Sending router
-    private Neighbor from;  // Receiving router
+    private final Neighbor to;    // Sending router
+    private final boolean keepalive;
+    private final Neighbor from;  // Receiving router
 
     public static HashMap<Neighbor, Socket> sockets = new HashMap<Neighbor, Socket>();
 
@@ -50,12 +51,22 @@ public class BroadcastingService implements Runnable {
         return result.toString();
     }
 
+    private static String getKeepAliveMsg(Neighbor from) {
+        StringBuilder result = new StringBuilder();
+        result.append("From:");
+        result.append(Setup.ROUTER_NAME);
+        result.append("\n");
+        result.append("Type:KeepAlive\n");
+        return result.toString();
+    }
+
     /////////////////////////////////////////////////////
     // Constructor:
     /////////////////////////////////////////////////////
-    public BroadcastingService(Neighbor from, Neighbor to) {
+    public BroadcastingService(Neighbor from, Neighbor to, boolean keepalive) {
         this.from = from;
         this.to = to;
+        this.keepalive = keepalive;
     }
 
     /////////////////////////////////////////////////////
@@ -87,10 +98,15 @@ public class BroadcastingService implements Runnable {
                 sock = BroadcastingService.getSocket(from, to); // obtener socket del pool
 
                 Setup.println("[BroadcastingService.run] Notificando a " + to.getAddr().getHostAddress());
-                Setup.println(dvs.replaceAll("^", "[BroadcastingService.run]\n"));
-
                 DataOutputStream out = new DataOutputStream(sock.getOutputStream());
-                out.writeBytes(dvs);
+                if (keepalive){
+                    String msg = getKeepAliveMsg(from);
+                    Setup.println(msg.replaceAll("^", "[BroadcastingService.run]\n"));
+                    out.writeBytes(msg);
+                } else {
+                    Setup.println(dvs.replaceAll("^", "[BroadcastingService.run]\n"));
+                    out.writeBytes(dvs);
+                }
                 out.flush();
 
                 //  sock.close();
@@ -100,7 +116,7 @@ public class BroadcastingService implements Runnable {
                 //   if (tries >= 10)
                 Setup.println("[BroadcastingService.run] No es posible enviar a " +
                         to.getAddr().getHostAddress());
-
+                sockets.remove(to);
             }
         }
     }

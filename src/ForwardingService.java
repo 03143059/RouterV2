@@ -4,14 +4,14 @@
  */
 
 import javax.swing.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,8 +26,24 @@ public class ForwardingService implements Runnable {
     //region Static methods
 
     static boolean SendMessage(ForwarderMessage message){
-        JOptionPane.showMessageDialog(null, "El mensaje ha sido enviado a " + message.to);
-        return false;
+        InetAddress addr = null;
+        try {
+            Setup.println("[ForwardingService.SendMessage] Creando socket a " + message.to);
+            for(NbrCostPair nbr : Setup.nbrList){
+                if (nbr.getNbr().getId().equalsIgnoreCase(message.to)) addr = nbr.getNbr().getAddr();
+            }
+            Socket socket = new Socket(addr, Setup.FORWARDING_PORT);
+            Setup.println("[ForwardingService.SendMessage] Enviando mensaje a " + addr.getHostAddress());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.writeBytes(message.toString());
+            out.flush();
+            socket.close();
+        } catch (Exception e) {
+            Setup.println("[ForwardingService.SendMessage] No es posible enviar mensaje al destino " + e.getMessage());
+            return false;
+        }
+        //JOptionPane.showMessageDialog(null, "El mensaje ha sido enviado a " + message.to);
+        return true;
     }
 
     static ForwardingService server = null;
@@ -126,19 +142,52 @@ public class ForwardingService implements Runnable {
 
         public void run() {
             try {
-                InputStream input = clientSocket.getInputStream();
-                OutputStream output = clientSocket.getOutputStream();
-                long time = System.currentTimeMillis();
-                output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
-                        this.serverText + " - " +
-                        time +
-                        "").getBytes());
-                output.close();
-                input.close();
-                Setup.println("[ForwarderWorker.run]: " + time);
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                //get From:<Name Router>
+                String line = in.readLine();
+                Setup.println("<<Received from client>>\n" + line + "\n");
+                //tokenizer From
+                StringTokenizer st = new StringTokenizer(line, ":");
+                //ignore "From"
+                st.nextToken();
+                //get name of Router
+                String fromId = st.nextToken();
+
+                //get "To:<type>"
+                line = in.readLine();
+                Setup.println("<<Received from client>>\n" + line + "\n");
+                //tokenizer To
+                st = new StringTokenizer(line, ":");
+                //ignore "To"
+                st.nextToken();
+                //get target
+                String toId = st.nextToken();
+                //get "Msg:msg"
+                line = in.readLine();
+                Setup.println("<<Received from client>>\n" + line + "\n");
+                //tokenizer Msg
+                st = new StringTokenizer(line, ":");
+                //ignore "To"
+                st.nextToken();
+                String msg = st.nextToken("\n");
+                while((line = in.readLine()) != null) {
+                    msg += line + "\n";
+                }
+                in.close();
+
+                if (toId.equalsIgnoreCase(Setup.ROUTER_NAME)) {
+                    // we are the target
+                    Setup.println("<<Received Incoming Message>>\n" + msg + "\n");
+                } else {
+                    // forward message
+                    SendMessage(new ForwarderMessage(fromId, toId, msg));
+                }
+
             } catch (IOException e) {
                 //report exception somewhere.
-                e.printStackTrace();
+                //e.printStackTrace();
+                Setup.println("[ForwardingService.run] Error: " + e.getMessage());
             }
         }
     }

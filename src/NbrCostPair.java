@@ -27,4 +27,8 @@ public class NbrCostPair {
         return cost;
     }
 
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
+
 }

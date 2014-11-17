@@ -1,4 +1,4 @@
- /**
+/**
  * Neighbor.java -- encapsulates the information about a router.
  * Strictly speaking, this class should not have been necessary, since it
  * duplicates a lot of the information in class "Router".
@@ -10,11 +10,12 @@
 import java.net.InetAddress;
 import java.util.HashMap;
 
- public class Neighbor {
+public class Neighbor {
     private String id; // this neighbor's id
     private InetAddress addr; // this neighbor's IP address
     private int port; // this neighbor's port
     private HashMap<String, Integer> dv; // this neighbor's row in the network cost table
+    public int UpdateCount = 0;
 
     /////////////////////////////////////////////////////////////
     // Constructor:

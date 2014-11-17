@@ -7,9 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,14 +21,16 @@ public class RoutingService implements Runnable {
     private InetAddress addr;
     private int port;
     private ArrayList<NbrCostPair> nbrList;
-    private HashMap<String, Integer> dv;
+    public static HashMap<String, Integer> dv;
+    public static HashMap<String, String> next;
     private Neighbor myself;
-    public static final int INFINITY = 9999;
+    public static final int INFINITY = 99;
 
 
     //region Static methods
 
     static RoutingService server = null;
+    private long scheduleInterval;
 
     public static boolean isServerRunning() {
         return server != null && server.isRunning;
@@ -76,18 +76,23 @@ public class RoutingService implements Runnable {
         this.port = Setup.ROUTING_PORT;
         this.nbrList = Setup.nbrList;
         dv = new HashMap<String, Integer>();
+        next = new HashMap<String, String>();
+        scheduleInterval = Long.parseLong(RuteadorWindow.dlgSettings.txtInterval.getText()) + new Random(new Date().getTime()).nextInt(5);
 
         Setup.println("Starting Router <" + id + "> on port " + port);
         Setup.println("Neighbors: " + getNbrString());
+        Setup.println("Routing update interval: " + scheduleInterval + " secs");
         Setup.println();
 
         // First, initialize distance vector with information about immediate neighbors.
         for (NbrCostPair nbr : nbrList) {
             dv.put(nbr.getNbr().getId(), nbr.getCost());
+            next.put(nbr.getNbr().getId(), nbr.getNbr().getId());
         }
 
         // Finally, distance to myself is always 0:
         dv.put(id, 0);
+        next.put(id, id);
 
         /////////////////////////////////////////////
         // For consistency I must create a "Neighbor" object
@@ -97,8 +102,15 @@ public class RoutingService implements Runnable {
 
         printTable(); // print table first
 
-        // Send distance vector to all neighbors:
+        // Send distance vector to all neighbors and schedule task
         distribute();
+        Timer timerUpdate = new Timer();
+        timerUpdate.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                distribute(true); // keepalive
+            }
+        },scheduleInterval * 1000, scheduleInterval * 1000);
 
         openServerSocket();
         while (!isStopped()) {
@@ -163,7 +175,6 @@ public class RoutingService implements Runnable {
     public void printTable() {
         Setup.println("                     DISTANCE TABLE");
         Setup.println("----------------------------------------------------------");
-        Setup.print("\t\t");
         for (String n : dv.keySet()) {
             Setup.print("\t" + n);
         }
@@ -172,7 +183,7 @@ public class RoutingService implements Runnable {
         // print mine
         Setup.print(id);
         for (String n : dv.keySet()) {
-            Setup.print("\t\t" + dv.get(n));
+            Setup.print("\t" + dv.get(n));
         }
         Setup.println();
 
@@ -182,19 +193,36 @@ public class RoutingService implements Runnable {
             Setup.print(ncp.getNbr().getId());
             for (String n : dv.keySet()) {
                 Integer distance = ndv.get(n);
-                Setup.print("\t\t" + ((distance == null) ? "NaN" : distance));
+                Setup.print("\t" + ((distance == null) ? "INF" : distance));
             }
             Setup.println();
         }
         Setup.println();
     }
 
-    public void distribute() {
+    public void distribute(boolean keepalive) {
         for (NbrCostPair ncp : nbrList) {
-            BroadcastingService br = new BroadcastingService(myself, ncp.getNbr());
+            if (keepalive) {
+                // check if neighbors are updated
+                ncp.getNbr().UpdateCount++;
+                if (ncp.getNbr().UpdateCount >= 3) {
+                    Setup.println("<<Neighbor " + ncp.getNbr().getId() + " is DOWN>>");
+                    Setup.println("Broadcasting...");
+                    Setup.println();
+                    ncp.setCost(INFINITY); // set neighbor cost
+                    // Update own Distance Vector
+                    dv.put(ncp.getNbr().getId(), INFINITY);
+                    next.put(ncp.getNbr().getId(), null);
+                    keepalive = false; // notify
+                }
+            }
+            BroadcastingService br = new BroadcastingService(myself, ncp.getNbr(), keepalive);
             Thread t = new Thread(br);
             t.start();
         }
+    }
+    public void distribute() {
+        distribute(false);
     }
 
     //endregion // instance methods
@@ -222,6 +250,7 @@ public class RoutingService implements Runnable {
 
                 //get From:<Name Router>
                 String line = in.readLine();
+                Setup.println("<<Received from client>>\n" + line + "\n");
                 //tokenizer From
                 StringTokenizer st = new StringTokenizer(line, ":");
                 //ignore "From"
@@ -231,6 +260,7 @@ public class RoutingService implements Runnable {
 
                 //get "Type:<type>"
                 line = in.readLine();
+                Setup.println("<<Received from client>>\n" + line + "\n");
                 //tokenizer Type
                 st = new StringTokenizer(line, ":");
                 //ignore "Type"
@@ -238,12 +268,14 @@ public class RoutingService implements Runnable {
                 //get type of message
                 String msgType = st.nextToken();
 
-                if (msgType.equals("HELLO")) {
+                if (msgType.equalsIgnoreCase("HELLO")) {
                     Setup.println("[RouterWorker.run] HELLO from " + fromId);
-                    String message = "From:" + addr.getHostAddress() + "\nType:WELCOME\n";
+                    String message = "From:" + Setup.ROUTER_NAME + "\nType:WELCOME\n";
                     DataOutputStream outToClient = new DataOutputStream(clientSocket.getOutputStream());
                     outToClient.writeBytes(message + '\n');
                     outToClient.flush();
+                    Setup.println("<<Sent to client>>\n" + message + "\n");
+
                 } else {
                     throw new Exception("Tipo de mensaje invalido");
                 }
@@ -255,6 +287,7 @@ public class RoutingService implements Runnable {
 
                     //get From:<Name Router>
                     line = in.readLine();
+                    Setup.println("<<Received from client>>\n" + line + "\n");
                     //tokenizer From
                     st = new StringTokenizer(line, ":");
                     //ignore "From"
@@ -264,6 +297,7 @@ public class RoutingService implements Runnable {
 
                     //get "Type:<type>"
                     line = in.readLine();
+                    Setup.println("<<Received from client>>\n" + line + "\n");
                     //tokenizer Type
                     st = new StringTokenizer(line, ":");
                     //ignore "Type"
@@ -271,11 +305,33 @@ public class RoutingService implements Runnable {
                     //get type of message
                     msgType = st.nextToken();
 
-                    if (!msgType.equals("DV"))
+                    if (msgType.equalsIgnoreCase("KeepAlive")) {
+                        Setup.println("[RouterWorker.run] KeepAlive from " + fromId);
+                        if (RuteadorWindow.dlgSettings.chkSendResponse.isSelected()) {
+                            String message = "From:" + Setup.ROUTER_NAME + "\nType:" + RuteadorWindow.dlgSettings.txtResponse.getText() + "\n";
+                            DataOutputStream outToClient = new DataOutputStream(clientSocket.getOutputStream());
+                            outToClient.writeBytes(message + '\n');
+                            outToClient.flush();
+                            Setup.println("<<Sent to client>>\n" + message + "\n");
+                        }
+                    }
+                    else if (!msgType.equals("DV"))
                         throw new Exception("Tipo de mensaje invalido");
+
+                    // reset neighbor update count
+                    for (NbrCostPair ncp : nbrList) {
+                        if (ncp.getNbr().getId().equalsIgnoreCase(fromId)) {
+                            ncp.getNbr().UpdateCount = 0;
+                            Setup.println("<<Neighbor " + ncp.getNbr().getId() + " is ALIVE>>");
+                            Setup.println();
+                        }
+                    }
+
+                    if (msgType.equalsIgnoreCase("KeepAlive")) continue;
 
                     //get "Len:<leb>"
                     line = in.readLine();
+                    Setup.println("<<Received from client>>\n" + line + "\n");
                     //tokenizer Type
                     st = new StringTokenizer(line, ":");
                     //ignore "Len"
@@ -303,15 +359,26 @@ public class RoutingService implements Runnable {
 
                         if (!dv.containsKey(n)) {
                             dv.put(n, INFINITY);
+                            next.put(n, null);
                         }
 
                         int bc = getNbrCost(fromId);
 
                         if (dv.get(n) > bc + fromdv.get(n)) {
                             change = true;
-                            Setup.print(String.format("<<Better route to %s>>\ncurr: %d, new: %d [%d + %d]\n\n", n, dv.get(n), bc + fromdv.get(n), bc, fromdv.get(n)));
+                            Setup.print(String.format("<<Better route to %s>>\ncurr: %d, new: %d [%d + %d]\n\n",
+                                    n, dv.get(n), bc + fromdv.get(n), bc, fromdv.get(n)));
                             // Update own Distance Vector
                             dv.put(n, bc + fromdv.get(n));
+                            next.put(n, fromId);
+                        } else if (dv.get(n) != INFINITY && fromdv.get(n)== INFINITY){
+                            // link status changed
+                            change = true;
+                            Setup.print(String.format("<<Route to %s is DOWN>>\ncurr: %d, new: %d\n\n",
+                                    n, dv.get(n), fromdv.get(n)));
+                            // Update own Distance Vector
+                            dv.put(n, INFINITY);
+                            next.put(n, null);
                         }
 
                         // Update Routing table
@@ -341,11 +408,12 @@ public class RoutingService implements Runnable {
                 Setup.println("[RouterWorker.run] Tiempo de espera de conexion agotado");
             } catch (Exception ioe) {
                 Setup.println("[RouterWorker.run] Error de servidor: " + ioe);
-                ioe.printStackTrace();
+              //  ioe.printStackTrace();
             } finally {
                 try {
                     in.close(); //close character input stream
                     clientSocket.close(); //close socket connection
+
                 } catch (Exception e) {
                     Setup.println("[RouterWorker.run] Error cerrando conexion: " + e);
                 }
