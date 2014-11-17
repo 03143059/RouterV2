@@ -24,8 +24,17 @@ public class Setup {
 
 
     public static void println(String s){
+        print(s + "\n");
+    }
+
+    public static void print(String s){
         if (ruteadorWindow != null)
-            ruteadorWindow.println(s);
+            ruteadorWindow.print(s);
+       // System.out.print(s);
+    }
+
+    public static void println(){
+        print("\n");
     }
 
     public static void main(String[] args) throws IOException {
@@ -92,16 +101,6 @@ public class Setup {
                     showHelp();
                 }
             }
-
-//            HashMap<String, Integer> ndv = new HashMap<String, Integer>();
-//            for (NbrCostPair nbp : nbrList) {
-//                ndv.put(nbp.getNbr().getId(), Router.INFINITY);
-//            }
-//
-//            for (NbrCostPair nbr : nbrList){
-//                HashMap<String, Integer> dv = nbr.getNbr().getDv();
-//                dv.putAll(ndv);
-//            }
 
             System.out.println("Utilizando IP: " + address.getHostAddress());
 

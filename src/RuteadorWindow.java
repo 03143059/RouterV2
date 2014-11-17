@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 /**
  * @author Werner
  */
-public class RuteadorWindow extends JFrame implements TableModelListener {
+public class RuteadorWindow extends JFrame  {
 
     final static boolean DEBUG = true;
 
@@ -42,13 +42,19 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
     public void log(final String txt) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                txtLog.append(txt);
+                synchronized (txtLog) {
+                    txtLog.append(txt);
+                }
             }
         });
     }
 
     public void println(final String txt) {
-        log(txt + "\n");
+        print(txt + "\n");
+    }
+
+    public void print(final String txt) {
+        log(txt);
     }
 
     public RuteadorWindow(String hostAddress) {
@@ -76,7 +82,6 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
 
         initComponents();
 
-        routeTable.getModel().addTableModelListener(this);
         routeTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 14));
         MaskFormatter mf1 = null;
         try {
@@ -90,21 +95,14 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
 
         setSize(new Dimension(800, 600));
 
-        lblSource.setText(hostAddress);
+        lblSource.setText(Setup.ROUTER_NAME + " (" + hostAddress + ")");
+        setTitle("Proyecto 2 CC8 - Ruteador de Paquetes - " + Setup.ROUTER_NAME + " (" + hostAddress + ")");
 
         exec = new ScheduledThreadPoolExecutor(1);
 
         println("CONSOLA DE MENSAJES");
         println("-------------------");
         println("");
-
-//        exec.schedule(new Runnable() {
-//            public void run() {
-//                JOptionPane.showMessageDialog(null,
-//                        "Antes de iniciar los servicios debe cargar una tabla de rutas",
-//                        "Aviso", JOptionPane.WARNING_MESSAGE);
-//            }
-//        }, 1, TimeUnit.SECONDS);
 
         abrirLog();
 
@@ -635,17 +633,6 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
 
     }
 
-    @Override
-    public void tableChanged(TableModelEvent e) {
-//        int row = e.getFirstRow();
-//        int column = e.getColumn();
-//        MyTableModel model = (MyTableModel)e.getSource();
-//        String columnName = model.getColumnName(column);
-//        Object data = model.getValueAt(row, column);
-
-        // Do something with the data...
-    }
-
     private class MyTableModel extends AbstractTableModel {
 
         private final String[] columnNames = {"#",
@@ -660,9 +647,6 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
             refreshRoutes();
         }
 
-        /**
-         * Lee el archivo de rutas y las muestra en la interfaz
-         */
         public void refreshRoutes() {
             this.fireTableDataChanged();
         }
@@ -689,12 +673,6 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
             return null;
         }
 
-        /*
-         * JTable uses this method to determine the default renderer/
-         * editor for each cell.  If we didn't implement this method,
-         * then the last column would contain text ("true"/"false"),
-         * rather than a check box.
-         */
         public Class getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
@@ -702,29 +680,6 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
         public ArrayList<NbrCostPair> getData() {
             return data;
         }
-
-        /*
-     * Don't need to implement this method unless your table's
-     * editable.
-     */
-//        public boolean isCellEditable(int row, int col) {
-//            //Note that the data/cell address is constant,
-//            //no matter where the cell appears onscreen.
-//            if (col < 2) {
-//                return false;
-//            } else {
-//                return true;
-//            }
-//        }
-
-        /*
-         * Don't need to implement this method unless your table's
-         * data can change.
-         */
-//        public void setValueAt(Object value, int row, int col) {
-//            data[row][col] = value;
-//            fireTableCellUpdated(row, col);
-//        }
 
     }
 
@@ -801,7 +756,7 @@ public class RuteadorWindow extends JFrame implements TableModelListener {
 
         public void actionPerformed(ActionEvent e) {
             actionStartRouter.setEnabled(false);
-            RoutingService.start(Setup.address, Setup.ROUTING_PORT); // iniciar servidor de mensajes
+            RoutingService.start(); // iniciar servidor de mensajes
 
             exec.schedule(new Runnable() {
                 public void run() {

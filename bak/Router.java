@@ -34,9 +34,9 @@ public class Router implements Runnable {
     /////////////////////////////////////////////
     public void run() {
 
-        System.out.println("Starting Router <" + id + "> on port " + port);
-        System.out.println("Neighbors: " + getNbrString());
-        System.out.println();
+        Setup.println("Starting Router <" + id + "> on port " + port);
+        Setup.println("Neighbors: " + getNbrString());
+        Setup.println();
 
         /////////////////////////////////////////////
         // Initialize the router's "distance" vector:
@@ -113,9 +113,9 @@ public class Router implements Runnable {
                 }
 
                 if (change) {
-                    System.out.println("<<Change detected>>");
-                    System.out.println("Broadcasting...");
-                    System.out.println();
+                    Setup.println("<<Change detected>>");
+                    Setup.println("Broadcasting...");
+                    Setup.println();
                     ///// DISTRIBUTE THE UPDATED VECTOR TO ALL NEIGHBORS
                     distribute();
 
@@ -147,29 +147,29 @@ public class Router implements Runnable {
 
     // CONVENIENT UTILITY PROGRAM TO PRINT A DISTANCE VECTOR:
     public void printDv(String fromId,  HashMap<String, Integer> dv) {
-        System.out.println("<<From neighbor " + fromId + ">>");
+        Setup.println("<<From neighbor " + fromId + ">>");
         for (String n : dv.keySet()) {
             System.out.print(n + ":" + dv.get(n) + " ");
         }
-        System.out.println();
-        System.out.println();
+        Setup.println();
+        Setup.println();
     }
 
     public void printTable() {
-        System.out.println("                     DISTANCE TABLE");
-        System.out.println("----------------------------------------------------------");
+        Setup.println("                     DISTANCE TABLE");
+        Setup.println("----------------------------------------------------------");
         System.out.print("\t\t");
         for (String n : dv.keySet()) {
             System.out.print("\t" + n);
         }
-        System.out.println();
+        Setup.println();
 
         // print mine
         System.out.print(id);
         for (String n : dv.keySet()) {
             System.out.print("\t\t" + dv.get(n));
         }
-        System.out.println();
+        Setup.println();
 
         // print neighbors'
         for (NbrCostPair ncp : nbrList) {
@@ -179,9 +179,9 @@ public class Router implements Runnable {
                 Integer distance = ndv.get(n);
                 System.out.print("\t\t" + ((distance==null)?"NaN":distance));
             }
-            System.out.println();
+            Setup.println();
         }
-        System.out.println();
+        Setup.println();
     }
 
     public void distribute() {
