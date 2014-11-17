@@ -1,0 +1,431 @@
+JFDML JFormDesigner: "5.1.3.0.158" Java: "1.8.0_25" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			"visible": true
+			"title": "Proyecto 2 CC8 - Ruteador de Paquetes"
+			"defaultCloseOperation": 3
+			"$sizePolicy": 1
+			"$locationPolicy": 1
+			"minimumSize": new java.awt.Dimension( 640, 480 )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+				"rows": 2
+				"columns": 1
+			} ) {
+				name: "panelMenu"
+				"border": sfield com.jformdesigner.model.FormObject NULL_VALUE
+				add( new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
+					name: "menuBar1"
+					add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+						name: "menu1"
+						"text": "Archivo"
+						"mnemonic": 65
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem1"
+							"mnemonic": 83
+							"action": new FormReference( "actionSalir" )
+						} )
+					} )
+					add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+						name: "menu2"
+						"text": "Herramientas"
+						"mnemonic": 72
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem4"
+							"text": "text"
+							"action": new FormReference( "actionStartRouter" )
+						} )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem5"
+							"text": "text"
+							"action": new FormReference( "actionStartForwarder" )
+						} )
+						add( new FormComponent( "javax.swing.JPopupMenu$Separator" ) {
+							name: "separator1"
+						} )
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem3"
+							"action": new FormReference( "actionRouteTable" )
+							"mnemonic": 84
+						} )
+					} )
+					add( new FormContainer( "javax.swing.JMenu", new FormLayoutManager( class javax.swing.JMenu ) ) {
+						name: "menu3"
+						"text": "Ayuda"
+						"mnemonic": 85
+						add( new FormComponent( "javax.swing.JMenuItem" ) {
+							name: "menuItem2"
+							"action": new FormReference( "actionAbout" )
+						} )
+					} )
+				} )
+				add( new FormContainer( "javax.swing.JToolBar", new FormLayoutManager( class javax.swing.JToolBar ) ) {
+					name: "toolBar1"
+					"floatable": false
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button2"
+						"action": new FormReference( "actionStartRouter" )
+						"mnemonic": 73
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button8"
+						"action": new FormReference( "actionStartForwarder" )
+						"mnemonic": 73
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "btnTable"
+						"text": "text"
+						"action": new FormReference( "actionRouteTable" )
+						"mnemonic": 84
+						"selected": true
+					} )
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "North"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+				"$columnSpecs": "165, 0:1.0"
+				"$rowSpecs": "0:1.0"
+				"$hGap": 5
+				"$alignTop": true
+				"$alignLeft": true
+			} ) {
+				name: "panelStatus"
+				"border": new javax.swing.border.EmptyBorder( 2, 2, 2, 2 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) {
+					"vgap": 5
+					"hgap": 5
+				} ) {
+					name: "pnlStatus3"
+					"border": &CompoundBorder0 new javax.swing.border.CompoundBorder( new javax.swing.border.EtchedBorder( 1, null, null ), new javax.swing.border.EmptyBorder( 3, 3, 3, 3 ) )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "labelStatus1"
+						"text": "Listo"
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) {
+					"vgap": 5
+					"hgap": 5
+				} ) {
+					name: "pnlStatus2"
+					"border": #CompoundBorder0
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "labelStatus2"
+						"text": "Listo"
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+				}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+					"gridx": 1
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "South"
+			} )
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) {
+				"hgap": 5
+				"vgap": 5
+			} ) {
+				name: "panelMain"
+				"border": new javax.swing.border.CompoundBorder( new javax.swing.border.EmptyBorder( 0, 0, 5, 0 ), new javax.swing.border.EtchedBorder( 1, null, null ) )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridBagLayout ) {
+					"$columnSpecs": "91, 0:1.0"
+					"$rowSpecs": "0, 0, 59, 0:1.0"
+					"$hGap": 5
+					"$vGap": 5
+					"$alignTop": true
+					"$alignLeft": true
+				} ) {
+					name: "panelMsg"
+					"border": new javax.swing.border.EmptyBorder( 5, 5, 5, 5 )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label3"
+						"text": "Origen:"
+						"font": &Font0 new java.awt.Font( "Tahoma", 1, 14 )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "lblSource"
+						"text": "localhost"
+						"font": #Font0
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label4"
+						"text": "Destino:"
+						"font": #Font0
+						"displayedMnemonic": 68
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridy": 1
+					} )
+					add( new FormComponent( "javax.swing.JFormattedTextField" ) {
+						name: "txtTarget"
+						"font": new java.awt.Font( "Tahoma", 0, 14 )
+						"focusAccelerator": 'D'
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+						"gridy": 1
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label5"
+						"text": "Mensaje:"
+						"font": #Font0
+						"verticalAlignment": 1
+						"displayedMnemonic": 77
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridy": 2
+					} )
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "scrollPane1"
+						add( new FormComponent( "javax.swing.JTextArea" ) {
+							name: "txtMsg"
+							"text": "Mensaje de prueba"
+							"focusAccelerator": 'M'
+						} )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+						"gridy": 2
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) {
+						"alignment": 0
+						"hgap": 0
+					} ) {
+						name: "panel1"
+						add( new FormComponent( "javax.swing.JButton" ) {
+							name: "btnSend"
+							"action": new FormReference( "actionSendMessage" )
+							"mnemonic": 69
+						} )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.GridBagConstraintsEx ) {
+						"gridx": 1
+						"gridy": 3
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "First"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) {
+					"hgap": 5
+					"vgap": 5
+				} ) {
+					name: "panel2"
+					"border": new javax.swing.border.EmptyBorder( 5, 5, 5, 5 )
+					add( new FormContainer( "javax.swing.JSplitPane", new FormLayoutManager( class javax.swing.JSplitPane ) ) {
+						name: "splitPane1"
+						"dividerLocation": 540
+						add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+							name: "scrollPane2"
+							add( new FormComponent( "javax.swing.JTextArea" ) {
+								name: "txtLog"
+								"editable": false
+								"background": new java.awt.Color( 0, 0, 0, 255 )
+								"foreground": new java.awt.Color( 255, 255, 255, 255 )
+								"lineWrap": true
+							} )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "left"
+						} )
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+							name: "contentPanel"
+							add( new FormContainer( "javax.swing.JToolBar", new FormLayoutManager( class javax.swing.JToolBar ) ) {
+								name: "toolBar2"
+								"floatable": false
+								add( new FormComponent( "javax.swing.JButton" ) {
+									name: "button3"
+									"visible": false
+								} )
+								add( new FormComponent( "javax.swing.JButton" ) {
+									name: "button6"
+									"visible": false
+								} )
+								add( new FormComponent( "javax.swing.JToolBar$Separator" ) {
+									name: "separator2"
+								} )
+								add( new FormComponent( "javax.swing.JButton" ) {
+									name: "button4"
+									"visible": false
+								} )
+								add( new FormComponent( "javax.swing.JButton" ) {
+									name: "button5"
+									"visible": false
+								} )
+								add( new FormComponent( "javax.swing.JToolBar$Separator" ) {
+									name: "separator3"
+								} )
+								add( new FormComponent( "javax.swing.JButton" ) {
+									name: "button7"
+									"visible": false
+								} )
+								add( new FormComponent( "javax.swing.JLabel" ) {
+									name: "label1"
+									"text": "Routers Adyacentes"
+									"horizontalAlignment": 2
+									"font": new com.jformdesigner.model.SwingDerivedFont( null, 131073, 0, false )
+									"preferredSize": new java.awt.Dimension( 3000, 14 )
+									"horizontalTextPosition": 4
+									"maximumSize": new java.awt.Dimension( 3000, 14 )
+								} )
+							}, new FormLayoutConstraints( class java.lang.String ) {
+								"value": "First"
+							} )
+							add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+								name: "scrollPane3"
+								add( new FormComponent( "javax.swing.JTable" ) {
+									name: "routeTable"
+									"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector {
+										add( "#" )
+										add( "Nombre" )
+										add( "IP" )
+										add( "Costo" )
+									}, new java.util.Vector {
+										add( class java.lang.Integer )
+										add( class java.lang.String )
+										add( class java.lang.String )
+										add( class java.lang.Integer )
+									}, new java.util.Vector {
+										add( false )
+										add( false )
+										add( false )
+										add( false )
+									}, new java.util.Vector {
+										add( new com.jformdesigner.model.SwingTableColumn( null, 30, 0, 30, true ) )
+										add( null )
+										add( null )
+										add( null )
+									} )
+									"font": new java.awt.Font( "Tahoma", 0, 14 )
+									"rowHeight": 20
+									"rowMargin": 2
+								} )
+							}, new FormLayoutConstraints( class java.lang.String ) {
+								"value": "Center"
+							} )
+						}, new FormLayoutConstraints( class java.lang.String ) {
+							"value": "right"
+						} )
+					}, new FormLayoutConstraints( class java.lang.String ) {
+						"value": "Center"
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 770, 415 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionSalir"
+			"$action.Name": "Salir"
+			"$action.ShortDescription": "Salir el programa"
+			"$action.LongDescription": "Salir el programa"
+			"$action.AcceleratorKey": static javax.swing.KeyStroke getKeyStroke( 115, 520, false )
+			"$action.ActionCommandKey": "Salir"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/exclamation.png" )
+			auxiliary() {
+				"JavaCodeGenerator.className": "Salir"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 425 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionRouteTable"
+			"$action.Name": "Tabla de Ruteo"
+			"$action.ShortDescription": "Mostrar Tabla de Ruteo"
+			"$action.LongDescription": "Mostrar Tabla de Ruteo"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/table.png" )
+			"$action.ActionCommandKey": "RouteTable"
+			auxiliary() {
+				"JavaCodeGenerator.className": "ShowRouteTable"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 75, 425 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionAbout"
+			"$action.Name": "Acerca de..."
+			"$action.ShortDescription": "Acerca de..."
+			"$action.LongDescription": "Acerca de..."
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/help.png" )
+			"$action.ActionCommandKey": "About"
+			auxiliary() {
+				"JavaCodeGenerator.className": "About"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 185, 425 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionStartRouter"
+			"$action.Name": "Iniciar Router"
+			"$action.ShortDescription": "Iniciar Router"
+			"$action.LongDescription": "Iniciar Router"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/resultset_next.png" )
+			"$action.ActionCommandKey": "StartRouter"
+			"enabled": false
+			auxiliary() {
+				"JavaCodeGenerator.className": "StartRouter"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 475 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionSendMessage"
+			"$action.Name": "Enviar mensaje"
+			"$action.ShortDescription": "Enviar mensaje"
+			"$action.LongDescription": "Enviar mensaje"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/email_go.png" )
+			"$action.ActionCommandKey": "SendMsg"
+			"enabled": false
+			auxiliary() {
+				"JavaCodeGenerator.className": "SendMessage"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 270, 425 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionStartForwarder"
+			"$action.Name": "Iniciar Forwarder"
+			"$action.ShortDescription": "Iniciar Forwarder"
+			"$action.LongDescription": "Iniciar Forwarder"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/resultset_nextfw.png" )
+			"$action.ActionCommandKey": "StartForwarder"
+			"enabled": false
+			auxiliary() {
+				"JavaCodeGenerator.className": "StartForwarder"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 210, 475 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionStopRouter"
+			"$action.Name": "Detener Router"
+			"$action.ShortDescription": "Detener Router"
+			"$action.LongDescription": "Detener Router"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/resultset_stop.png" )
+			"$action.ActionCommandKey": "StopRouter"
+			auxiliary() {
+				"JavaCodeGenerator.className": "StopRouter"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 105, 475 )
+		} )
+		add( new FormNonVisual( "javax.swing.AbstractAction" ) {
+			name: "actionStopForwarder"
+			"$action.Name": "Detener Forwarder"
+			"$action.ShortDescription": "Detener Forwarder"
+			"$action.LongDescription": "Detener Forwarder"
+			"$action.SmallIcon": new com.jformdesigner.model.SwingIcon( 0, "/images/resultset_stopfw.png" )
+			"$action.ActionCommandKey": "StopForwarder"
+			auxiliary() {
+				"JavaCodeGenerator.className": "StopForwarder"
+			}
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 335, 475 )
+		} )
+	}
+}

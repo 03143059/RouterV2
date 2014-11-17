@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Setup {
@@ -15,6 +17,16 @@ public class Setup {
 
     public static InetAddress address = null;
     public static String ROUTER_NAME;
+    public static RuteadorWindow ruteadorWindow;
+
+    public static final ArrayList<NbrCostPair> nbrList = new ArrayList<NbrCostPair>();
+    public static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
+    public static void println(String s){
+        if (ruteadorWindow != null)
+            ruteadorWindow.println(s);
+    }
 
     public static void main(String[] args) throws IOException {
         int num = 0;
@@ -66,7 +78,6 @@ public class Setup {
             // parsear vecinos
             int n = args.length - 3;
 
-            ArrayList<NbrCostPair> nbrList = new ArrayList<NbrCostPair>();
             StringTokenizer st;
 
             for (int i = 0; i < n; i++) {
@@ -93,8 +104,16 @@ public class Setup {
 //            }
 
             System.out.println("Utilizando IP: " + address.getHostAddress());
-            Router r = new Router(ROUTER_NAME, address, ROUTING_PORT, nbrList);
-            r.run();
+
+            //Router r = new Router(ROUTER_NAME, address, ROUTING_PORT, nbrList);
+            //r.run();
+
+            // Start window
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    ruteadorWindow = new RuteadorWindow(address.getHostAddress());
+                }
+            });
         }
     }
 
