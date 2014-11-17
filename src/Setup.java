@@ -77,10 +77,20 @@ public class Setup {
                     Neighbor node = new Neighbor(name, addr, ROUTING_PORT, new HashMap<String, Integer>()); // costs are unknown
                     nbrList.add(new NbrCostPair(node, Integer.parseInt(st.nextToken())));
                 } catch (Exception ex) {
-                    System.out.println("Error parsing newighbors: " + ex.getMessage());
+                    System.out.println("Error parsing neighbors: " + ex.getMessage());
                     showHelp();
                 }
             }
+
+//            HashMap<String, Integer> ndv = new HashMap<String, Integer>();
+//            for (NbrCostPair nbp : nbrList) {
+//                ndv.put(nbp.getNbr().getId(), Router.INFINITY);
+//            }
+//
+//            for (NbrCostPair nbr : nbrList){
+//                HashMap<String, Integer> dv = nbr.getNbr().getDv();
+//                dv.putAll(ndv);
+//            }
 
             System.out.println("Utilizando IP: " + address.getHostAddress());
             Router r = new Router(ROUTER_NAME, address, ROUTING_PORT, nbrList);

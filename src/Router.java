@@ -4,34 +4,27 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Router implements Runnable {
-    private int n;
-    private int id;
+    private String id;
     private InetAddress addr;
     private int port;
     private ArrayList<NbrCostPair> nbrList;
-    private int[] dv;
-    private int[] next;
+    private HashMap<String, Integer> dv;
     private Neighbor myself;
     public static final int INFINITY = 999;
 
     ////////////////////////////////////////////
     // Constructor:
     ////////////////////////////////////////////
-    public Router(int n, int id, InetAddress addr, int port,
+    public Router(String id, InetAddress addr, int port,
                   ArrayList<NbrCostPair> nbrList) {
-        this.n = n;
         this.id = id;
         this.addr = addr;
         this.port = port;
         this.nbrList = nbrList;
-        dv = new int[n];
-        next = new int[n];
+        dv = new HashMap<String, Integer>();
     }
 
     /////////////////////////////////////////////
@@ -42,37 +35,26 @@ public class Router implements Runnable {
     public void run() {
 
         System.out.println("Starting Router <" + id + "> on port " + port);
-        System.out.println("Network size: " + n);
         System.out.println("Neighbors: " + getNbrString());
         System.out.println();
 
         /////////////////////////////////////////////
-        // Initialize the router's "distance" and "next router" vectors:
+        // Initialize the router's "distance" vector:
         /////////////////////////////////////////////
 
-        // First, initialize distance vector to all "infinity" and
-        // next router vector to "none" (I use an invalid number -1 for this):
-        for (int i = 0; i < n; i++) {
-            dv[i] = INFINITY;
-            next[i] = -1;
-        }
-
-        // Now modify distance vector with information about immediate neighbors.
-        // The "next router" entry is just the neighbor's id.
-        for (NbrCostPair ncp : nbrList) {
-            dv[ncp.getNbr().getId()] = ncp.getCost();
-            next[ncp.getNbr().getId()] = ncp.getNbr().getId();
+        // First, initialize distance vector with information about immediate neighbors.
+        for (NbrCostPair nbr : nbrList) {
+            dv.put(nbr.getNbr().getId(), nbr.getCost());
         }
 
         // Finally, distance to myself is always 0:
-        dv[id] = 0;
-        next[id] = id;
+        dv.put(id, 0);
 
         /////////////////////////////////////////////
         // For consistency I must create a "Neighbor" object
         // for myself. (See header comments about refactoring code.)
         /////////////////////////////////////////////
-        myself = new Neighbor(n, id, addr, port, dv);
+        myself = new Neighbor(id, addr, port, dv);
 
         printTable(); // print table first
 
@@ -83,7 +65,7 @@ public class Router implements Runnable {
 
         ServerSocket listen = null;
         try {
-            listen = new ServerSocket(port);
+            listen = new ServerSocket(port, 0, addr);
 
             while (true) {
                 //// Open a socket, read the distance vector (in my program I
@@ -92,11 +74,13 @@ public class Router implements Runnable {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String line = in.readLine();
                 StringTokenizer st = new StringTokenizer(line, " ");
-                int fromId = Integer.parseInt(st.nextToken());
-                int[] fromdv = new int[n];
-                for (int i = 0; i < n; i++) {
-                    int fdv = Integer.parseInt(st.nextToken());
-                    fromdv[i] = fdv;
+                String fromId = st.nextToken();
+                HashMap<String, Integer> fromdv = new HashMap<String, Integer>();
+                while (st.hasMoreTokens()) {
+                    StringTokenizer stp = new StringTokenizer(st.nextToken(), ":");
+                    String name = stp.nextToken();
+                    int fdv = Integer.parseInt(stp.nextToken());
+                    fromdv.put(name, fdv);
                 }
                 socket.close();
 
@@ -104,28 +88,34 @@ public class Router implements Runnable {
                 printDv(fromId, fromdv);
 
                 boolean change = false;
-                for (int i = 0; i < n; i++) {
+                for (String n : fromdv.keySet()) {
                     ////// Update my own distance vector and routing table:
+
+                    if (!dv.containsKey(n)){
+                        dv.put(n, INFINITY);
+                    }
+
                     int bc = getNbrCost(fromId);
 
-                    if (dv[i] > bc + fromdv[i]) {
+                    if (dv.get(n) > bc + fromdv.get(n)) {
                         change = true;
-                        System.out.printf("Better route to %d: curr: %d, new: %d [%d + %d], next: %d\n", i, dv[i], bc + fromdv[i], bc, fromdv[i], fromId);
+                        System.out.printf("<<Better route to %s>>\ncurr: %d, new: %d [%d + %d]\n\n", n, dv.get(n), bc + fromdv.get(n), bc, fromdv.get(n));
                         // Update own Distance Vector
-                        dv[i] = bc + fromdv[i];
-                        next[i] = fromId;
+                        dv.put(n, bc + fromdv.get(n));
                     }
 
                     // Update Routing table
                     for (NbrCostPair ncp : nbrList) {
-                        if (ncp.getNbr().getId() == fromId) {
-                            ncp.getNbr().getDv()[i] = fromdv[i];
+                        if (ncp.getNbr().getId().equalsIgnoreCase(fromId)) {
+                            ncp.getNbr().getDv().put(n, fromdv.get(n));
                         }
                     }
                 }
 
                 if (change) {
-                    System.out.println("Change detected. Broadcasting...");
+                    System.out.println("<<Change detected>>");
+                    System.out.println("Broadcasting...");
+                    System.out.println();
                     ///// DISTRIBUTE THE UPDATED VECTOR TO ALL NEIGHBORS
                     distribute();
 
@@ -148,43 +138,46 @@ public class Router implements Runnable {
         return r;
     }
 
-    private int getNbrCost(int fromId) {
+    private int getNbrCost(String fromId) {
         for (NbrCostPair ncp : nbrList) {
-            if (ncp.getNbr().getId() == fromId) return ncp.getCost();
+            if (ncp.getNbr().getId().equalsIgnoreCase(fromId)) return ncp.getCost();
         }
         return 0;
     }
 
     // CONVENIENT UTILITY PROGRAM TO PRINT A DISTANCE VECTOR:
-    public void printDv(int fromId, int dv[]) {
-        System.out.println("From neighbor " + fromId + ":");
-        for (int i = 0; i < n; i++) {
-            System.out.print(dv[i] + " ");
+    public void printDv(String fromId,  HashMap<String, Integer> dv) {
+        System.out.println("<<From neighbor " + fromId + ">>");
+        for (String n : dv.keySet()) {
+            System.out.print(n + ":" + dv.get(n) + " ");
         }
+        System.out.println();
         System.out.println();
     }
 
     public void printTable() {
-        System.out.println("       DISTANCE TABLE");
-        System.out.println("-----------------------------");
-        for (int i = 0; i < n; i++) {
-            System.out.print("\t" + i);
+        System.out.println("                     DISTANCE TABLE");
+        System.out.println("----------------------------------------------------------");
+        System.out.print("\t\t");
+        for (String n : dv.keySet()) {
+            System.out.print("\t" + n);
         }
         System.out.println();
 
         // print mine
         System.out.print(id);
-        for (int j = 0; j < n; j++) {
-            System.out.print("\t" + dv[j]);
+        for (String n : dv.keySet()) {
+            System.out.print("\t\t" + dv.get(n));
         }
         System.out.println();
 
         // print neighbors'
         for (NbrCostPair ncp : nbrList) {
-            int[] ndv = ncp.getNbr().getDv();
+            HashMap<String, Integer> ndv = ncp.getNbr().getDv();
             System.out.print(ncp.getNbr().getId());
-            for (int j = 0; j < n; j++) {
-                System.out.print("\t" + ndv[j]);
+            for (String n : dv.keySet()) {
+                Integer distance = ndv.get(n);
+                System.out.print("\t\t" + ((distance==null)?"NaN":distance));
             }
             System.out.println();
         }
