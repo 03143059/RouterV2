@@ -26,11 +26,17 @@ public class ForwardingService implements Runnable {
     //region Static methods
 
     static boolean SendMessage(ForwarderMessage message){
+        if (message.to.equalsIgnoreCase(Setup.ROUTER_NAME)) {
+            // we are the target
+            Setup.println("<<Received Incoming Message to ME from " + message.from + ">>\n" + message.text + "\n");
+            return true;
+        }
         InetAddress addr = null;
         try {
             Setup.println("[ForwardingService.SendMessage] Creando socket a " + message.to);
             for(NbrCostPair nbr : Setup.nbrList){
-                if (nbr.getNbr().getId().equalsIgnoreCase(message.to)) addr = nbr.getNbr().getAddr();
+                if (RoutingService.next.containsKey(message.to) &&
+                        nbr.getNbr().getId().equalsIgnoreCase(RoutingService.next.get(message.to))) addr = nbr.getNbr().getAddr();
             }
             Socket socket = new Socket(addr, Setup.FORWARDING_PORT);
             Setup.println("[ForwardingService.SendMessage] Enviando mensaje a " + addr.getHostAddress());
@@ -178,9 +184,10 @@ public class ForwardingService implements Runnable {
 
                 if (toId.equalsIgnoreCase(Setup.ROUTER_NAME)) {
                     // we are the target
-                    Setup.println("<<Received Incoming Message>>\n" + msg + "\n");
+                    Setup.println("<<Received Incoming Message to ME from " + fromId + ">>\n" + msg + "\n");
                 } else {
                     // forward message
+                    Setup.println("<<Forwarding Incoming Message to " + toId + " from " + fromId + ">>\n" + msg + "\n");
                     SendMessage(new ForwarderMessage(fromId, toId, msg));
                 }
 

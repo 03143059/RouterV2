@@ -713,7 +713,7 @@ public class RuteadorWindow extends JFrame  {
 //                JOptionPane.showMessageDialog(null, "La direccion IP es invalida!");
 //                return;
 //            }
-            if (!RoutingService.dv.containsKey(target)) {
+            if (!RoutingService.next.containsKey(target)) {
                 JOptionPane.showMessageDialog(null, "La ruta destino es invalida!");
                 return;
             }
